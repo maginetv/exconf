@@ -51,7 +51,7 @@ Finally, if you called *execute*, the *execution_command* will be executed, as d
 the variables. The default value for *execution_command* is defined in *exconf.yaml*, but you can
 overwrite this as any other variable.
 
-The variable resolving and overwrite order:
+### The variable resolving and overwrite order
 
 1. *exconf.yaml*
 2. *environments*/*.yaml
@@ -80,7 +80,7 @@ order. For example, you might have *environments/defaults.yaml* and *environment
 in which case the conflicting variables defined in *defaults.yaml* will be overwritten
 by *globals.yaml*.
 
-The templates will be resolved similarly upon execution and templating using the CLI.
+### The templates resolving and overwrite order
 
 1. *templates*/\<template_type\>/*
 2. *templates*/\<template_type\>/*environments*/\<target_environment\>/*
@@ -88,8 +88,13 @@ The templates will be resolved similarly upon execution and templating using the
 4. *templates*/\<template_type\>/*environments*/\<target_environment\>/*services*/\<target_service\>/*
 
 Notice again that you do not need to define all of these sub-folders for your templates, and usually
-you are fine with just the template_Type root level configurations that apply similarly to all
+you are fine with just the template_type root level configurations that apply similarly to all
 services in any environment using the type of template.
+
+If the same configuration file name is defined in lower levels, the higher level template will be
+overwritten by the more specific configuration.
+
+Try out the configuration resolution using the CLI **template** command!
 
 
 ## Hello World Example
