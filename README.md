@@ -55,9 +55,9 @@ The variable resolving and overwrite order:
 
 1. *exconf.yaml*
 2. *environments*/*.yaml
-3. *environments*/<target_environment>/*.yaml
-4. *services*/<target_service>/*.yaml
-5. *environments*/<target_environment>/*services*/<target_service>/*.yaml
+3. *environments*/\<target_environment\>/*.yaml
+4. *services*/\<target_service\>/*.yaml
+5. *environments*/\<target_environment\>/*services*/\<target_service\>/*.yaml
 6. CLI parameter overrides
 
 Notice the the structure above is static and defines the structure for your configuration folder.
@@ -68,11 +68,11 @@ The structure for the configuration folder allows you to define service and envi
 configurations, and also different configurations for a specific service only on specific
 environment. This can be rephrased as:
 * *environments* folder contains configurations for all services in all environments.
-* *environments*/<target_environment> folder contains configurations for all services on
+* *environments*/\<target_environment\> folder contains configurations for all services on
   a specific environment.
-* *services*/<target_service> folder contains configurations for specific service
+* *services*/\<target_service\> folder contains configurations for specific service
   in all environments.
-* *environments*/<target_environment>/*services*/<target_service> folder contains configurations
+* *environments*/\<target_environment\>/*services*/\<target_service\> folder contains configurations
   for specific service in a specific environment.
 
 If there are multiple YAML files in a folder to be resolved, they will be applied in alphabetical
@@ -82,10 +82,10 @@ by *globals.yaml*.
 
 The templates will be resolved similarly upon execution and templating using the CLI.
 
-1. *templates*/<template_type>/*
-2. *templates*/<template_type>/*environments*/<target_environment>/*
-3. *templates*/<template_type>/*services*/<target_service>/*
-4. *templates*/<template_type>/*environments*/<target_environment>/*services*/<target_service>/*
+1. *templates*/\<template_type\>/*
+2. *templates*/\<template_type\>/*environments*/\<target_environment\>/*
+3. *templates*/\<template_type\>/*services*/\<target_service\>/*
+4. *templates*/\<template_type\>/*environments*/\<target_environment\>/*services*/\<target_service\>/*
 
 Notice again that you do not need to define all of these sub-folders for your templates, and usually
 you are fine with just the template_Type root level configurations that apply similarly to all
@@ -94,8 +94,8 @@ services in any environment using the type of template.
 
 ## Hello World Example
 
-You define your configuration in the *templates/<template_type>/my_config.yaml*, and for execution
-you might have a script in *templates/<template_type>/deploy.sh*. The default execution script
+You define your configuration in the *templates/\<template_type\>/my_config.yaml*, and for execution
+you might have a script in *templates/\<template_type\>/deploy.sh*. The default execution script
 is defined also in *exconf.yaml*, and initially it is *deploy.sh*. When you call the CLI for
 execution, this is how it finds the file to execute.
 
