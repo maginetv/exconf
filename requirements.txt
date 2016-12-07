@@ -1,0 +1,4 @@
+logbook>=1.0.0
+click>=6.6
+pyyaml>=3.12
+pip>=9.0.1

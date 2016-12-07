@@ -1,0 +1,18 @@
+---
+exconf_configuration_root: 'example'
+
+# These dir names are relative to the exconf_configuration_root.
+templates_dir_name: 'templates'
+services_dir_name: 'services'
+environments_dir_name: 'environments'
+
+# The string templates in your configuration templates will be replaced recursively
+# by the variables resolved for the service and environment combo you are running.
+string_template_prefix: '{{'
+string_template_suffix: '}}'
+string_template_ignore_whitespace: true
+
+# If you run exconf execute, this is the command that will be run in the template
+# temporary folder. If you point to a file name, make sure you have such template
+# file available.
+execution_command: './deploy.sh'

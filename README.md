@@ -51,6 +51,7 @@ Finally, if you called *execute*, the *execution_command* will be executed, as d
 the variables. The default value for *execution_command* is defined in *exconf.yaml*, but you can
 overwrite this as any other variable.
 
+
 ### The variable resolving and overwrite order
 
 1. *exconf.yaml*
@@ -78,7 +79,8 @@ environment. This can be rephrased as:
 If there are multiple YAML files in a folder to be resolved, they will be applied in alphabetical
 order. For example, you might have *environments/defaults.yaml* and *environments/globals.yaml*,
 in which case the conflicting variables defined in *defaults.yaml* will be overwritten
-by *globals.yaml*.
+by the equally named variables in *globals.yaml*.
+
 
 ### The templates resolving and overwrite order
 
@@ -88,7 +90,7 @@ by *globals.yaml*.
 4. *templates*/\<template_type\>/*environments*/\<target_environment\>/*services*/\<target_service\>/*
 
 Notice again that you do not need to define all of these sub-folders for your templates, and usually
-you are fine with just the template_type root level configurations that apply similarly to all
+you are fine with just the *template_type* root level configurations that apply similarly to all
 services in any environment using the type of template.
 
 If the same configuration file name is defined in lower levels, the higher level template will be
@@ -99,13 +101,3 @@ Try out the configuration resolution using the CLI **template** command!
 
 ## Hello World Example
 
-You define your configuration in the *templates/\<template_type\>/my_config.yaml*, and for execution
-you might have a script in *templates/\<template_type\>/deploy.sh*. The default execution script
-is defined also in *exconf.yaml*, and initially it is *deploy.sh*. When you call the CLI for
-execution, this is how it finds the file to execute.
-
-1. Install exconf from a Debian package, or run it directly from the source.
-
-2. Initialize new configuration source location.
-
-TODO: keep working here
