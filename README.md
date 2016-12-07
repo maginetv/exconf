@@ -22,10 +22,10 @@ Things you will need to setup:
 * Configuration root folder on your host, which you probably want to version control for real use.
 
 Configuration folder will contain:
-* *exconf.yaml* containing the generic configuration for the Exconf tool.
-* *templates* directory for your service configurations.
-* *environments* directory for your environment specific configuration variables.
-* *services* directory for your service specific configuration variables.
+* **exconf.yaml** containing the generic configuration for the Exconf tool.
+* **templates** directory for your service configurations.
+* **environments** directory for your environment specific configuration variables.
+* **services** directory for your service specific configuration variables.
 
 NOTICE: You can change the name of these directories in the *exconf.yaml*, if you wish.
 
@@ -43,7 +43,7 @@ will replace the string templates with configuration variables defined in the *e
 and *services* folders. Variables inside other variables will be replaced in recursive manner
 until all string templates are resolved.
 
-When you call *execute* or *template*, the CLI will generate a temporary folder
+When you call *execute* or *template* command, the CLI will generate a temporary folder
 locally and copy all the templates defined in the *templates* folder for your specific
 *template_type* that is defined for the service and environment. These templates will be resolved
 and all found string variables replaced by the recursively resolved variables as described above.
@@ -52,6 +52,7 @@ the variables. The default value for *execution_command* is defined in *exconf.y
 overwrite this as any other variable.
 
 The variable resolving and overwrite order:
+
 1. *exconf.yaml*
 2. *environments*/*.yaml
 3. *environments*/<target_environment>/*.yaml
@@ -59,11 +60,36 @@ The variable resolving and overwrite order:
 5. *environments*/<target_environment>/*services*/<target_service>/*.yaml
 6. CLI parameter overrides
 
+Notice the the structure above is static and defines the structure for your configuration folder.
+You don't need to define all the levels mentioned above, and the CLI will just skip folders or
+configurations it cannot find.
+
+The structure for the configuration folder allows you to define service and environment specific
+configurations, and also different configurations for a specific service only on specific
+environment. This can be rephrased as:
+* *environments* folder contains configurations for all services in all environments.
+* *environments*/<target_environment> folder contains configurations for all services on
+  a specific environment.
+* *services*/<target_service> folder contains configurations for specific service
+  in all environments.
+* *environments*/<target_environment>/*services*/<target_service> folder contains configurations
+  for specific service in a specific environment.
 
 If there are multiple YAML files in a folder to be resolved, they will be applied in alphabetical
 order. For example, you might have *environments/defaults.yaml* and *environments/globals.yaml*,
 in which case the conflicting variables defined in *defaults.yaml* will be overwritten
 by *globals.yaml*.
+
+The templates will be resolved similarly upon execution and templating using the CLI.
+
+1. *templates*/<template_type>/*
+2. *templates*/<template_type>/*environments*/<target_environment>/*
+3. *templates*/<template_type>/*services*/<target_service>/*
+4. *templates*/<template_type>/*environments*/<target_environment>/*services*/<target_service>/*
+
+Notice again that you do not need to define all of these sub-folders for your templates, and usually
+you are fine with just the template_Type root level configurations that apply similarly to all
+services in any environment using the type of template.
 
 
 ## Hello World Example
