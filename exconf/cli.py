@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import click
+import json
 import os
 
 from exconf.config import ExconfConfig
@@ -25,15 +26,15 @@ from exconf.utils import (
 LOG = get_logger(os.path.basename(__file__))
 
 DEFAULT_CONFIG_ROOT = '.'
-EXCONF = 'exconf'
+VAR_CONFIG_ROOT = 'config_root'
 
 
 def setup_config_in_context(ctx, config_root):
-    ctx.obj[EXCONF] = ExconfConfig(config_root)
+    ctx.obj[VAR_CONFIG_ROOT] = config_root
 
 
 def get_config(ctx):
-    return ctx.obj[EXCONF]
+    return ExconfConfig(ctx.obj[VAR_CONFIG_ROOT])
 
 
 def output(line, color='green'):
@@ -41,6 +42,15 @@ def output(line, color='green'):
         click.echo()
     else:
         click.echo(click.style(str(line), fg=color))
+
+
+def parse_extra_vars(variables):
+    extra_vars = {}
+    if variables:
+        for var in variables:
+            key, value = var.split('=')
+            extra_vars[key] = value
+    return extra_vars
 
 
 @click.group(help="Exconf CLI Tool")
@@ -64,6 +74,30 @@ def list_services(ctx):
         output("No services found", color='yellow')
     for x in service_names:
         output(x)
+
+
+@cli.command('list-envs')
+@click.pass_context
+def list_envs(ctx):
+    """List all defined environments."""
+    env_names = get_config(ctx).list_environments()
+    if not env_names:
+        output("No environments found", color='yellow')
+    for x in env_names:
+        output(x)
+
+
+@cli.command('variables')
+@click.option('-s', '--service', help='Service name.', required=True)
+@click.option('-e', '--environment', help='Environment name.', required=True)
+@click.option('-x', '--extra-var', multiple=True, help='Extra variables, as key=value pairs.')
+@click.pass_context
+def variables(ctx, service, environment, extra_var):
+    """List all variables for given service and environment."""
+    cfg = get_config(ctx)
+    all_vars = cfg.resolve_variables(service, environment,
+                                     parse_extra_vars(extra_var))
+    output(json.dumps(all_vars, indent=2, sort_keys=True))
 
 
 def main():

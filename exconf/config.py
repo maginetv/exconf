@@ -73,12 +73,14 @@ class ExconfConfig(object):
         self.config_vars = read_yaml(exconf_config_file_path)
 
     def list_services(self):
-        return sorted([f for f in os.listdir(self.__get_services_root_dir())
-                       if os.path.isdir(f)])
+        the_dir = self.__get_services_root_dir()
+        return sorted([f for f in os.listdir(the_dir)
+                       if os.path.isdir(os.path.join(the_dir, f))])
 
     def list_environments(self):
-        return sorted([f for f in os.listdir(self.__get_environments_root_dir())
-                       if os.path.isdir(f)])
+        the_dir = self.__get_environments_root_dir()
+        return sorted([f for f in os.listdir(the_dir)
+                           if os.path.isdir(os.path.join(the_dir, f))])
 
     def load_global_variables(self):
         """Loads all the variables found from the environment root.
