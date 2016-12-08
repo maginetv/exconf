@@ -10,7 +10,10 @@ environments_dir_name: 'environments'
 # by the variables resolved for the service and environment combo you are running.
 string_template_prefix: '{{'
 string_template_suffix: '}}'
-string_template_ignore_whitespace: true
+
+# If you don't wish to have comment lines for your templates,
+# just leave template_comment_line_begin empty.
+template_comment_line_begin: '#'
 
 # If you run exconf execute, this is the command that will be run in the template
 # temporary folder. If you point to a file name, make sure you have such template
