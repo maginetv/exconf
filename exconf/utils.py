@@ -80,13 +80,13 @@ def call_shell(temp_work_dir, shell_cmd, print_output=True):
 
 
 def read_and_combine_yamls_in_dir(the_dir):
-    LOG.debug("Loading variables from directory: {}", the_dir)
+    LOG.debug("Loading variables in YAML files from directory: {}", the_dir)
     all_vars = {}
     if os.path.isdir(the_dir):
         for file_path in files_in_dir(the_dir, REGEXP_YAML_FILE):
             all_vars.update(read_yaml(file_path))
     else:
-        LOG.debug("Directory does not exist: {}", the_dir)
+        LOG.info("Directory does not exist: {}", the_dir)
     return all_vars
 
 
@@ -97,30 +97,47 @@ def files_in_dir(the_dir, filter_regexp=None):
             yield file_path
 
 
-def recursive_replace_config_vars(all_vars, require_all_replaced=True, comment_begin='#',
-                                  template_prefix='{{', template_suffix='}}'):
+def list_files_not_seen(source_dir, seen_file_names):
+    file_paths = []
+    if os.path.isdir(source_dir):
+        for x in os.listdir(source_dir):
+            x_path = os.path.join(source_dir, x)
+            if os.path.isfile(x_path) and x not in seen_file_names:
+                seen_file_names.add(x)
+                file_paths.append(x_path)
+    return file_paths
+
+
+def recursive_replace_vars(all_vars, require_all_replaced=True, comment_begin='#',
+                           template_prefix='{{', template_suffix='}}'):
     result = copy.deepcopy(all_vars)
-    for key in result.keys():
-        iterations = 0
-        has_changed = True
-        while has_changed:
-            iterations += 1
-            new_value, has_changed = \
-                substitute_vars(str(result[key]), result, require_all_replaced,
-                                comment_begin, template_prefix, template_suffix)
-            if has_changed:
-                LOG.debug("Substituted key '{}' to new value:\n'{}'\nfrom old value:\n'{}'",
-                          key, new_value, result[key])
-            result[key] = new_value
-            if iterations > 20:
-                LOG.error("Too many recursive calls to variable substitution. Variable: {}", key)
-                return None
+    for key in all_vars.keys():
+        result[key] = substitute_vars_until_done(str(result[key]), all_vars, require_all_replaced,
+                                                 comment_begin, template_prefix, template_suffix)
     return result
+
+
+def substitute_vars_until_done(data, all_vars, require_all_replaced, comment_begin,
+                               template_prefix, template_suffix):
+    iterations = 0
+    has_changed = True
+    while has_changed:
+        iterations += 1
+        data, has_changed = substitute_vars(data, all_vars, require_all_replaced,
+                                            comment_begin, template_prefix, template_suffix)
+        if iterations > 20:
+            LOG.error("Too many recursive calls to variable substitution. Last data: {}",
+                      data[0:500])
+            return None
+    return data
 
 
 def substitute_vars(data, vars, require_all_replaced=True, comment_begin='#',
                     template_prefix='{{', template_suffix='}}'):
-    """Just simple string template substitution, like Python string templates etc."""
+    """Just simple string template substitution, like Python string templates etc.
+
+    Provides also line numbers for missing variables so they can be highlighted.
+    """
     output = []
     missing_vars_with_lines = []
     replaced_variables = []
@@ -128,7 +145,7 @@ def substitute_vars(data, vars, require_all_replaced=True, comment_begin='#',
     line_num = 0
     for line in data.split('\n'):
         line_num += 1
-        if not line.strip().startswith(comment_begin):
+        if not comment_begin or not line.strip().startswith(comment_begin):
             i, j = 0, -1
             while 0 <= i < len(line):
                 i = tag_begin = line.find(template_prefix, i)
@@ -147,7 +164,8 @@ def substitute_vars(data, vars, require_all_replaced=True, comment_begin='#',
                             missing_vars_with_lines.append((line_num, var_name))
         output.append(line)
 
-    LOG.debug("Variables substituted in given data: {}", replaced_variables)
+    if replaced_variables:
+        LOG.debug("Variables substituted in given data: {}", replaced_variables)
     if missing_vars_with_lines:
         raise ValueError("Cannot replace key(s) in template (line, key_name): {}"
                          .format(missing_vars_with_lines))

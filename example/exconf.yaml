@@ -1,5 +1,5 @@
 ---
-exconf_configuration_root: 'example'
+exconf_configuration_root: '.'
 
 # These dir names are relative to the exconf_configuration_root.
 templates_dir_name: 'templates'

@@ -44,10 +44,13 @@ def output(line, color='green'):
         click.echo(click.style(str(line), fg=color))
 
 
-def parse_extra_vars(variables):
+def parse_extra_vars(input_vars):
     extra_vars = {}
-    if variables:
-        for var in variables:
+    if input_vars:
+        for var in input_vars:
+            if '=' not in var:
+                raise ValueError("Invalid extra variable input string (key=value required): {}"
+                                 .format(var))
             key, value = var.split('=')
             extra_vars[key] = value
     return extra_vars
@@ -93,11 +96,24 @@ def list_envs(ctx):
 @click.option('-x', '--extra-var', multiple=True, help='Extra variables, as key=value pairs.')
 @click.pass_context
 def variables(ctx, service, environment, extra_var):
-    """List all variables for given service and environment."""
+    """Resolve and show all variables for given service in given environment."""
     cfg = get_config(ctx)
     all_vars = cfg.resolve_variables(service, environment,
                                      parse_extra_vars(extra_var))
     output(json.dumps(all_vars, indent=2, sort_keys=True))
+
+
+@cli.command('templates')
+@click.option('-s', '--service', help='Service name.', required=True)
+@click.option('-e', '--environment', help='Environment name.', required=True)
+@click.option('-x', '--extra-var', multiple=True,
+              help='Extra variables, as "key=value" pairs. You can define this multiple times.')
+@click.pass_context
+def templates(ctx, service, environment, extra_var):
+    """Resolve and show all templates for given service in given environment."""
+    cfg = get_config(ctx)
+    for file_path in cfg.list_template_files(service, environment, parse_extra_vars(extra_var)):
+        cfg.populate_template(file_path)
 
 
 def main():

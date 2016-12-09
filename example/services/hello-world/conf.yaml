@@ -1,0 +1,4 @@
+---
+message: 'Hello World!'
+
+template_type: 'echo'

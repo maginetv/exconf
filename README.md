@@ -32,7 +32,7 @@ NOTICE: You can change the name of these directories in the *exconf.yaml*, if yo
 The actions the CLI supports for the configurations:
 * **"execute"** a script, which is usually for deployment purposes for a service. The execution must
   always target some service and some environment defined in the configuration folder.
-* **"template"** command prints out the templates for your service without executing any scripts.
+* **"templates"** command prints out the templates for your service without executing any scripts.
   You usually use this for confirming you configuration is valid before executing a deployment.
 * **"variables"** command can be used to print out all the variables that can be applied to the
   targeted service and environment.
@@ -43,7 +43,7 @@ will replace the string templates with configuration variables defined in the *e
 and *services* folders. Variables inside other variables will be replaced in recursive manner
 until all string templates are resolved.
 
-When you call *execute* or *template* command, the CLI will generate a temporary folder
+When you call *execute* or *templates* command, the CLI will generate a temporary folder
 locally and copy all the templates defined in the *templates* folder for your specific
 *template_type* that is defined for the service and environment. These templates will be resolved
 and all found string variables replaced by the recursively resolved variables as described above.
@@ -96,8 +96,4 @@ services in any environment using the type of template.
 If the same configuration file name is defined in lower levels, the higher level template will be
 overwritten by the more specific configuration.
 
-Try out the configuration resolution using the CLI **template** command!
-
-
-## Hello World Example
-
+Try out the configuration resolution using the CLI **templates** command.
