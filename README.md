@@ -107,7 +107,7 @@ defined string template prefix and suffix in the *exconf.yaml*. The default is t
 i.e. "___"
 
 Let's say that you would need to have a configuration file named after the deployed service
-name with .yml file type extension, you could add a file named *___service___.yml* into the
+name with .yml file type extension, you could add a file named *\_\_\_service\_\_\_.yml* into the
 templates directory of the *template_type* your service is using. Then if you have a variable
 named "service" with defined value *my_service* when populating the templates, the file would
 be named my_service.yml in the temporary work directory created for execution.
