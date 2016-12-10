@@ -18,7 +18,8 @@ from exconf.utils import (
     get_logger,
     read_and_combine_yamls_in_dir,
     recursive_replace_vars,
-    list_files_not_seen
+    list_files_not_seen,
+    substitute_vars_until_done
 )
 
 EXCONF_CONFIG_FILE_NAME = 'exconf.yaml'
@@ -44,23 +45,29 @@ class ExconfConfig(object):
     def __init__(self, config_root):
         self._init_variables(config_root)
 
+    def __get_vars(self):
+        """Return the variables resolved, or if not resolved yet, then only the config vars."""
+        if self.resolved_vars:
+            return self.resolved_vars
+        return self.config_vars
+
     def __get_services_root_dir(self):
-        the_dir = os.path.join(self.resolved_vars[EXCONF_VAR_CONFIG_ROOT],
-                               self.resolved_vars[EXCONF_VAR_SERVICES_DIR])
+        the_dir = os.path.join(self.__get_vars()[EXCONF_VAR_CONFIG_ROOT],
+                               self.__get_vars()[EXCONF_VAR_SERVICES_DIR])
         if not os.path.isdir(the_dir):
             raise ValueError("Services directory does not exist: {}".format(the_dir))
         return the_dir
 
     def __get_templates_root_dir(self):
-        the_dir = os.path.join(self.resolved_vars[EXCONF_VAR_CONFIG_ROOT],
-                               self.resolved_vars[EXCONF_VAR_TEMPLATES_DIR])
+        the_dir = os.path.join(self.__get_vars()[EXCONF_VAR_CONFIG_ROOT],
+                               self.__get_vars()[EXCONF_VAR_TEMPLATES_DIR])
         if not os.path.isdir(the_dir):
             raise ValueError("Templates directory does not exist: {}".format(the_dir))
         return the_dir
 
     def __get_environments_root_dir(self):
-        the_dir = os.path.join(self.resolved_vars[EXCONF_VAR_CONFIG_ROOT],
-                               self.resolved_vars[EXCONF_VAR_ENVIRONMENTS_DIR])
+        the_dir = os.path.join(self.__get_vars()[EXCONF_VAR_CONFIG_ROOT],
+                               self.__get_vars()[EXCONF_VAR_ENVIRONMENTS_DIR])
         if not os.path.isdir(the_dir):
             raise ValueError("Environments directory does not exist: {}".format(the_dir))
         return the_dir
@@ -68,7 +75,7 @@ class ExconfConfig(object):
     def __get_services_root_dir_for_env(self, environment):
         return os.path.join(self.__get_environments_root_dir(),
                             environment,
-                            self.resolved_vars[EXCONF_VAR_SERVICES_DIR])
+                            self.__get_vars()[EXCONF_VAR_SERVICES_DIR])
 
     def _init_variables(self, config_root):
         """Initializes the root configuration variables for this instance."""
@@ -87,7 +94,7 @@ class ExconfConfig(object):
         LOG.debug("Reading Exconf configuration from: {}", exconf_config_file_path)
         self.config_vars = read_yaml(exconf_config_file_path)
         self.config_vars[EXCONF_VAR_CONFIG_ROOT] = config_root
-        self.resolved_vars = self.config_vars
+        self.resolved_vars = None
 
     def list_services(self):
         the_dir = self.__get_services_root_dir()
@@ -144,13 +151,13 @@ class ExconfConfig(object):
         all_vars = self.load_all_variables(service, environment, extra_variables)
         self.resolved_vars = recursive_replace_vars(
             all_vars, require_all_replaced,
-            self.config_vars[EXCONF_VAR_TEMPLATE_COMMENT_BEGIN],
-            self.config_vars[EXCONF_VAR_STR_TEMPLATE_PREFIX],
-            self.config_vars[EXCONF_VAR_STR_TEMPLATE_SUFFIX])
+            all_vars[EXCONF_VAR_TEMPLATE_COMMENT_BEGIN],
+            all_vars[EXCONF_VAR_STR_TEMPLATE_PREFIX],
+            all_vars[EXCONF_VAR_STR_TEMPLATE_SUFFIX])
         return self.resolved_vars
 
     def list_template_files(self, service, environment, extra_variables=None):
-        all_vars = self.load_all_variables(service, environment, extra_variables)
+        all_vars = self.resolve_variables(service, environment, extra_variables)
         if EXCONF_VAR_TEMPLATE_TYPE not in all_vars:
             raise ValueError("Template type (var {}) not defined.".format(EXCONF_VAR_TEMPLATE_TYPE))
 
@@ -179,8 +186,31 @@ class ExconfConfig(object):
         all_templates.extend(list_files_not_seen(template_env_dir, seen_file_names))
         LOG.debug("Listing template files from: {}", template_root_dir)
         all_templates.extend(list_files_not_seen(template_root_dir, seen_file_names))
-        LOG.debug("Found {} template files in total: {}", len(seen_file_names), seen_file_names)
+        LOG.info("Found {} template files in total: {}", len(seen_file_names), seen_file_names)
         return all_templates
 
-    def populate_template(self, template_file_name):
-        pass
+    def populate_template(self, template_file_name, require_all_replaced=True):
+        LOG.debug("Populating template {} from file: {}",
+                  os.path.basename(template_file_name), template_file_name)
+        data = open(template_file_name).read()
+        return substitute_vars_until_done(data, self.__get_vars(), require_all_replaced,
+                                          self.__get_vars()[EXCONF_VAR_TEMPLATE_COMMENT_BEGIN],
+                                          self.__get_vars()[EXCONF_VAR_STR_TEMPLATE_PREFIX],
+                                          self.__get_vars()[EXCONF_VAR_STR_TEMPLATE_SUFFIX])
+
+    def parse_filename_var(self, file_name):
+        # TODO: cleanup this implementation and move filename string template to variables
+        all_vars = self.__get_vars()
+        while file_name.count("___") > 1:
+            LOG.debug("Parsing string template variable in file name: {}", file_name)
+            i = file_name.find("___")
+            j = file_name.find("___", i + 2)
+            filename_var = file_name[i + 2:j]
+            if filename_var not in all_vars:
+                LOG.error("Invalid file name variable '{}' in file name: {}",
+                          filename_var, file_name)
+                return None
+            substitute = all_vars[filename_var]
+            file_name = file_name[:i] + substitute + file_name[j + 2:]
+            LOG.debug("File name after parsing: {}", file_name)
+        return file_name

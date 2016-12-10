@@ -21,6 +21,7 @@ import sys
 import yaml
 
 REGEXP_YAML_FILE = '.*\.(yaml|yml)$'
+MAX_RECURSION_DEPTH = 30
 
 
 def figure_out_log_level(given_level):
@@ -112,8 +113,13 @@ def recursive_replace_vars(all_vars, require_all_replaced=True, comment_begin='#
                            template_prefix='{{', template_suffix='}}'):
     result = copy.deepcopy(all_vars)
     for key in all_vars.keys():
-        result[key] = substitute_vars_until_done(str(result[key]), all_vars, require_all_replaced,
-                                                 comment_begin, template_prefix, template_suffix)
+        try:
+            result[key] = substitute_vars_until_done(
+                str(result[key]), all_vars, require_all_replaced,
+                comment_begin, template_prefix, template_suffix)
+        except RecursionError as err:
+            LOG.error("Failed substituting key '{}'. {}", key, err)
+            raise err
     return result
 
 
@@ -125,15 +131,14 @@ def substitute_vars_until_done(data, all_vars, require_all_replaced, comment_beg
         iterations += 1
         data, has_changed = substitute_vars(data, all_vars, require_all_replaced,
                                             comment_begin, template_prefix, template_suffix)
-        if iterations > 20:
-            LOG.error("Too many recursive calls to variable substitution. Last data: {}",
-                      data[0:500])
-            return None
+        if iterations > MAX_RECURSION_DEPTH:
+            raise RecursionError("Too many iterations replacing template variables. Check your "
+                                 "variables for reference loops, or increase max recursion depth.")
     return data
 
 
-def substitute_vars(data, vars, require_all_replaced=True, comment_begin='#',
-                    template_prefix='{{', template_suffix='}}'):
+def substitute_vars(data, vars, require_all_replaced, comment_begin,
+                    template_prefix, template_suffix):
     """Just simple string template substitution, like Python string templates etc.
 
     Provides also line numbers for missing variables so they can be highlighted.
@@ -165,7 +170,7 @@ def substitute_vars(data, vars, require_all_replaced=True, comment_begin='#',
         output.append(line)
 
     if replaced_variables:
-        LOG.debug("Variables substituted in given data: {}", replaced_variables)
+        LOG.debug("Variables substituted: {}", replaced_variables)
     if missing_vars_with_lines:
         raise ValueError("Cannot replace key(s) in template (line, key_name): {}"
                          .format(missing_vars_with_lines))

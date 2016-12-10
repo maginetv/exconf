@@ -108,12 +108,20 @@ def variables(ctx, service, environment, extra_var):
 @click.option('-e', '--environment', help='Environment name.', required=True)
 @click.option('-x', '--extra-var', multiple=True,
               help='Extra variables, as "key=value" pairs. You can define this multiple times.')
+@click.option('-i', '--ignore-missing', is_flag=True,
+              help='Do not fail on undefined variables in templates.')
 @click.pass_context
-def templates(ctx, service, environment, extra_var):
+def templates(ctx, service, environment, extra_var, ignore_missing):
     """Resolve and show all templates for given service in given environment."""
     cfg = get_config(ctx)
+    require_all_replaced = not ignore_missing
     for file_path in cfg.list_template_files(service, environment, parse_extra_vars(extra_var)):
-        cfg.populate_template(file_path)
+        data = cfg.populate_template(file_path, require_all_replaced)
+
+        output('### ' + file_path, color='blue')
+        output('### ' + cfg.parse_filename_var(os.path.basename(file_path)) + ' ###', color='blue')
+        output(data)
+        output('### END ###', color='blue')
 
 
 def main():
