@@ -97,3 +97,17 @@ If the same configuration file name is defined in lower levels, the higher level
 overwritten by the more specific configuration.
 
 Try out the configuration resolution using the CLI **templates** command.
+
+
+### File name string templates
+
+Some systems require the configuration file names to be specific, like the name of the service
+being deployed. For this purpose you can use file name string templates, which have separately
+defined string template prefix and suffix in the *exconf.yaml*. The default is three underscores,
+i.e. "___"
+
+Let's say that you would need to have a configuration file named after the deployed service
+name with .yml file type extension, you could add a file named *___service___.yml* into the
+templates directory of the *template_type* your service is using. Then if you have a variable
+named "service" with defined value *my_service* when populating the templates, the file would
+be named my_service.yml in the temporary work directory created for execution.
