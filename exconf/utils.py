@@ -173,8 +173,8 @@ def substitute_vars(data, vars, require_all_replaced, comment_begin,
     if replaced_variables:
         LOG.debug("Variables substituted: {}", replaced_variables)
     if missing_vars_with_lines:
-        raise ValueError("Cannot replace key(s) in template (line, key_name): {}"
-                         .format(missing_vars_with_lines))
+        raise KeyError("Cannot replace key(s) in template (line, key_name): {}"
+                       .format(missing_vars_with_lines))
     return '\n'.join(output), has_changed
 
 

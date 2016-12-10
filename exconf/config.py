@@ -197,10 +197,10 @@ class ExconfConfig(object):
         LOG.info("Found {} template files in total: {}", len(seen_file_names), seen_file_names)
         return all_templates
 
-    def populate_template(self, template_file_name, require_all_replaced=True):
+    def populate_template(self, template_file_path, require_all_replaced=True):
         LOG.debug("Populating template {} from file: {}",
-                  os.path.basename(template_file_name), template_file_name)
-        data = open(template_file_name).read()
+                  os.path.basename(template_file_path), template_file_path)
+        data = open(template_file_path).read()
         return substitute_vars_until_done(data, self.__get_vars(), require_all_replaced,
                                           self.__get_vars()[EXCONF_VAR_TEMPLATE_COMMENT_BEGIN],
                                           self.__get_vars()[EXCONF_VAR_STR_TEMPLATE_PREFIX],
@@ -211,3 +211,21 @@ class ExconfConfig(object):
         return parse_filename_var(file_name, all_vars,
                                   all_vars[EXCONF_VAR_FILE_TEMPLATE_PREFIX],
                                   all_vars[EXCONF_VAR_FILE_TEMPLATE_SUFFIX])
+
+    def populate_and_write_template_file(self, template_file_path, target_dir):
+        if not os.path.isdir(target_dir):
+            raise ValueError("Target diretory does not exist: {}".format(target_dir))
+        try:
+            data = self.populate_template(template_file_path, True)
+        except KeyError as err:
+            LOG.error("Variable '{}' not defined for template file '{}'"
+                      .format(err.args[0], template_file_path))
+            LOG.info("Failed creating work directory into dir: {}", target_dir)
+            return False
+
+        target_base_name = self.parse_filename_var(os.path.basename(template_file_path))
+        target_file_path = os.path.join(target_dir, target_base_name)
+        LOG.info("Writing template file: {}", target_file_path)
+        open(target_file_path, 'w').write(data)
+        os.chmod(target_file_path, 0o640)
+        return True
