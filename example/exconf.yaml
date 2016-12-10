@@ -11,6 +11,11 @@ environments_dir_name: 'environments'
 string_template_prefix: '{{'
 string_template_suffix: '}}'
 
+# The string templates in file names will be substituted when the templates are
+# populated into a temporary folder for execution.
+file_name_template_prefix: '___'
+file_name_template_suffix: '___'
+
 # If you don't wish to have comment lines for your templates,
 # just leave template_comment_line_begin empty.
 template_comment_line_begin: '#'

@@ -21,6 +21,7 @@ import sys
 import yaml
 
 REGEXP_YAML_FILE = '.*\.(yaml|yml)$'
+REGEXP_INVALID_FILE_NAME_CHARS = '[^-_.A-Za-z0-9]'
 MAX_RECURSION_DEPTH = 30
 
 
@@ -59,7 +60,7 @@ def read_yaml(file_path):
 
 
 def call_shell(temp_work_dir, shell_cmd, print_output=True):
-    output = []
+    output_lines = []
     LOG.info("Calling shell ({}):\n{}", temp_work_dir, shell_cmd)
     proc = subprocess.Popen(shell_cmd, shell=True, cwd=temp_work_dir,
                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -69,15 +70,15 @@ def call_shell(temp_work_dir, shell_cmd, print_output=True):
         next_line = proc.stdout.readline().decode("utf-8")
         if next_line == '' and proc.poll() is not None:
             break
-        output.append(next_line)
+        output_lines.append(next_line)
         if print_output:
             sys.stdout.write(next_line)
             sys.stdout.flush()
 
     if proc.returncode != 0:
-        LOG.error("Running shell failed with return code: {}", str(proc.returncode))
+        LOG.warn("Running shell failed with return code: {}", str(proc.returncode))
 
-    return proc.returncode, output
+    return proc.returncode, output_lines
 
 
 def read_and_combine_yamls_in_dir(the_dir):
@@ -175,3 +176,25 @@ def substitute_vars(data, vars, require_all_replaced, comment_begin,
         raise ValueError("Cannot replace key(s) in template (line, key_name): {}"
                          .format(missing_vars_with_lines))
     return '\n'.join(output), has_changed
+
+
+def parse_filename_var(file_name, all_vars, template_prefix='___', template_suffix='___'):
+    while template_prefix in file_name:
+        LOG.debug("Parsing string template variable in file name: {}", file_name)
+        i = file_name.find(template_prefix)
+        j = file_name.find(template_suffix, i + len(template_prefix))
+        if j > i:
+            filename_var = file_name[i + len(template_prefix):j]
+            if filename_var not in all_vars:
+                raise ValueError("Invalid file name variable '{}' in file name: {}".format(
+                    filename_var, file_name))
+            substitute = all_vars[filename_var]
+            if re.search(REGEXP_INVALID_FILE_NAME_CHARS, substitute):
+                raise ValueError("Invalid file name substitute (var {}): {}"
+                                 .format(filename_var, substitute))
+            file_name = file_name[:i] + substitute + file_name[j + len(template_suffix):]
+            LOG.debug("File name after parsing: {}", file_name)
+        else:
+            LOG.info("Did not find file name template suffix for parsing: {}", file_name)
+            break
+    return file_name

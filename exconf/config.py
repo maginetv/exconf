@@ -19,7 +19,8 @@ from exconf.utils import (
     read_and_combine_yamls_in_dir,
     recursive_replace_vars,
     list_files_not_seen,
-    substitute_vars_until_done
+    substitute_vars_until_done,
+    parse_filename_var
 )
 
 EXCONF_CONFIG_FILE_NAME = 'exconf.yaml'
@@ -32,6 +33,8 @@ EXCONF_VAR_STR_TEMPLATE_PREFIX = 'string_template_prefix'
 EXCONF_VAR_STR_TEMPLATE_SUFFIX = 'string_template_suffix'
 EXCONF_VAR_TEMPLATE_COMMENT_BEGIN = 'template_comment_line_begin'
 EXCONF_VAR_TEMPLATE_TYPE = 'template_type'
+EXCONF_VAR_FILE_TEMPLATE_PREFIX = 'file_name_template_prefix'
+EXCONF_VAR_FILE_TEMPLATE_SUFFIX = 'file_name_template_suffix'
 
 LOG = get_logger(os.path.basename(__file__))
 
@@ -199,18 +202,7 @@ class ExconfConfig(object):
                                           self.__get_vars()[EXCONF_VAR_STR_TEMPLATE_SUFFIX])
 
     def parse_filename_var(self, file_name):
-        # TODO: cleanup this implementation and move filename string template to variables
         all_vars = self.__get_vars()
-        while file_name.count("___") > 1:
-            LOG.debug("Parsing string template variable in file name: {}", file_name)
-            i = file_name.find("___")
-            j = file_name.find("___", i + 2)
-            filename_var = file_name[i + 2:j]
-            if filename_var not in all_vars:
-                LOG.error("Invalid file name variable '{}' in file name: {}",
-                          filename_var, file_name)
-                return None
-            substitute = all_vars[filename_var]
-            file_name = file_name[:i] + substitute + file_name[j + 2:]
-            LOG.debug("File name after parsing: {}", file_name)
-        return file_name
+        return parse_filename_var(file_name, all_vars,
+                                  all_vars[EXCONF_VAR_FILE_TEMPLATE_PREFIX],
+                                  all_vars[EXCONF_VAR_FILE_TEMPLATE_SUFFIX])
