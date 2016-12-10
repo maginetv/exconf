@@ -8,26 +8,34 @@ different environment specific configuration details.
 
 Exconf follows these basic principles:
 
-* Keep it as simple as possible, i.e. it contains minimum set of features that is required.
+* Keep it as simple as possible, i.e. it contains minimum set of features that is required,
+  and more complex templating features like includes and loops are outside the scope of Exconf.
 * The configuration must be easily accessible by basic tools like grep and find.
-  This means that grepping for a variable name highlights you every instance of it, period.
+  This means that grepping for a variable name highlights every instance of it, and no
+  templating magic will hide it.
 * Exconf is designed to be the one place for all your environments configuration, and
-  it is kept simplistic for the purpose of clarity on avoiding confusion. Add complexity elsewhere.
+  it is kept simplistic for the purpose of clarity and avoiding confusion. Add complexity elsewhere,
+  like trigger an *Ansible* playbook or whatever other configuration management tool for
+  more complex needs.
 
 
 ## Exconf Overview
 
 Things you will need to setup:
-* Exconf command line (CLI) tool for templating and executing your configurations.
-* Configuration root folder on your host, which you probably want to version control for real use.
+* Exconf command line (CLI) tool for populating templates and executing scripts on configurations.
+* Configuration root folder on your host, which you probably want to version control for
+  persistency and version history.
 
-Configuration folder will contain:
+Configuration folder contains:
 * **exconf.yaml** containing the generic configuration for the Exconf tool.
-* **templates** directory for your service configurations.
+* **templates** directory for your service configuration templates.
 * **environments** directory for your environment specific configuration variables.
 * **services** directory for your service specific configuration variables.
 
 NOTICE: You can change the name of these directories in the *exconf.yaml*, if you wish.
+
+NOTICE: Variables "service" and "environment" are set into the variables automatically,
+        when you populate the templates or list variables, based on the CLI input.
 
 The actions the CLI supports for the configurations:
 * **"execute"** a script, which is usually for deployment purposes for a service. The execution must

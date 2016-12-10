@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import copy
 import os
 
 from exconf.utils import (
@@ -25,6 +26,8 @@ from exconf.utils import (
 
 EXCONF_CONFIG_FILE_NAME = 'exconf.yaml'
 
+EXCONF_VAR_SERVICE = 'service'
+EXCONF_VAR_ENVIRONMENT = 'environment'
 EXCONF_VAR_CONFIG_ROOT = 'exconf_configuration_root'
 EXCONF_VAR_SERVICES_DIR = 'services_dir_name'
 EXCONF_VAR_TEMPLATES_DIR = 'templates_dir_name'
@@ -139,7 +142,9 @@ class ExconfConfig(object):
         """Loads all variables for given service in given environment. Resolves and combines
         all variables in specific order, which is also described in the project readme.
         """
-        all_vars = self.config_vars.copy()
+        all_vars = copy.deepcopy(self.config_vars)
+        all_vars[EXCONF_VAR_SERVICE] = service
+        all_vars[EXCONF_VAR_ENVIRONMENT] = environment
         all_vars.update(self.load_global_variables())
         all_vars.update(self.load_env_variables(environment))
         all_vars.update(self.load_service_variables(service))
