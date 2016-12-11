@@ -59,15 +59,15 @@ def read_yaml(file_path):
     return yaml.load(open(file_path).read())
 
 
-def call_shell(temp_work_dir, shell_cmd, print_output=True):
+def call_shell(work_dir, shell_cmd, print_output=True):
     output_lines = []
-    LOG.info("Calling shell ({}):\n{}", temp_work_dir, shell_cmd)
-    proc = subprocess.Popen(shell_cmd, shell=True, cwd=temp_work_dir,
+    LOG.info("Calling shell in dir '{}':\n{}", work_dir, shell_cmd)
+    proc = subprocess.Popen(shell_cmd, shell=True, cwd=work_dir,
                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
     # Poll process for new output until finished
     while True:
-        next_line = proc.stdout.readline().decode("utf-8")
+        next_line = proc.stdout.readline().decode('utf-8')
         if next_line == '' and proc.poll() is not None:
             break
         output_lines.append(next_line)

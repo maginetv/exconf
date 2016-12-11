@@ -14,6 +14,8 @@
 import copy
 import os
 
+import tempfile
+
 from exconf.utils import (
     read_yaml,
     get_logger,
@@ -38,6 +40,8 @@ EXCONF_VAR_TEMPLATE_COMMENT_BEGIN = 'template_comment_line_begin'
 EXCONF_VAR_TEMPLATE_TYPE = 'template_type'
 EXCONF_VAR_FILE_TEMPLATE_PREFIX = 'file_name_template_prefix'
 EXCONF_VAR_FILE_TEMPLATE_SUFFIX = 'file_name_template_suffix'
+EXCONF_VAR_EXECUTION_COMMAND = 'execution_command'
+EXCONF_VAR_EXECUTION_FILE = 'execution_file'
 
 LOG = get_logger(os.path.basename(__file__))
 
@@ -102,6 +106,12 @@ class ExconfConfig(object):
         self.config_vars[EXCONF_VAR_CONFIG_ROOT] = config_root
         self.resolved_vars = None
 
+    def get_execution_file(self):
+        return self.__get_vars()[EXCONF_VAR_EXECUTION_FILE]
+
+    def get_execution_command(self):
+        return self.__get_vars()[EXCONF_VAR_EXECUTION_COMMAND]
+
     def list_services(self):
         the_dir = self.__get_services_root_dir()
         return sorted([f for f in os.listdir(the_dir)
@@ -164,8 +174,11 @@ class ExconfConfig(object):
             all_vars[EXCONF_VAR_STR_TEMPLATE_SUFFIX])
         return self.resolved_vars
 
-    def list_template_files(self, service, environment, extra_variables=None):
-        all_vars = self.resolve_variables(service, environment, extra_variables)
+    def list_template_files(self, service, environment, extra_variables=None,
+                            require_all_replaced=True, all_vars=None):
+        if not all_vars:
+            all_vars = self.resolve_variables(service, environment, extra_variables,
+                                              require_all_replaced)
         if EXCONF_VAR_TEMPLATE_TYPE not in all_vars:
             raise ValueError("Template type (var {}) not defined.".format(EXCONF_VAR_TEMPLATE_TYPE))
 
@@ -212,7 +225,7 @@ class ExconfConfig(object):
                                   all_vars[EXCONF_VAR_FILE_TEMPLATE_PREFIX],
                                   all_vars[EXCONF_VAR_FILE_TEMPLATE_SUFFIX])
 
-    def populate_and_write_template_file(self, template_file_path, target_dir):
+    def populate_and_write_template_file(self, template_file_path, target_dir, file_mode=0o640):
         if not os.path.isdir(target_dir):
             raise ValueError("Target diretory does not exist: {}".format(target_dir))
         try:
@@ -227,5 +240,29 @@ class ExconfConfig(object):
         target_file_path = os.path.join(target_dir, target_base_name)
         LOG.info("Writing template file: {}", target_file_path)
         open(target_file_path, 'w').write(data)
-        os.chmod(target_file_path, 0o640)
+        os.chmod(target_file_path, file_mode)
         return True
+
+    def prepare_templated_work_dir(self, service, environment, extra_variables=None,
+                                   require_all_replaced=True, target_dir=None):
+        if not target_dir:
+            target_dir = tempfile.mkdtemp()
+        if not os.path.isdir(target_dir):
+            os.makedirs(target_dir, 0o770)
+        LOG.info("Preparing temporary execution dir for service '{}' in env '{}': {}",
+                 service, environment, target_dir)
+        all_vars = self.resolve_variables(service, environment, extra_variables,
+                                          require_all_replaced)
+        exec_file_name = self.get_execution_file()
+
+        for file_path in self.list_template_files(service, environment, extra_variables,
+                                                  require_all_replaced, all_vars):
+            file_mode = 0o640
+            if os.path.basename(file_path) == exec_file_name:
+                file_mode = 0o770
+            success = self.populate_and_write_template_file(file_path, target_dir, file_mode)
+            if not success:
+                LOG.error("Failed writing template file: {}", file_path)
+                return None
+
+        return os.path.abspath(target_dir)

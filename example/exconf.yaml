@@ -22,5 +22,6 @@ template_comment_line_begin: '#'
 
 # If you run exconf execute, this is the command that will be run in the template
 # temporary folder. If you point to a file name, make sure you have such template
-# file available.
-execution_command: './deploy.sh'
+# file available. File defined in execution_file variable will get execution rights.
+execution_file: 'deploy.sh'
+execution_command: './{{ execution_file }}'

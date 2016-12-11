@@ -21,6 +21,7 @@ from exconf.utils import (
     get_logger,
     init_logging_stderr,
     verbosity_level_to_log_level,
+    call_shell
 )
 
 LOG = get_logger(os.path.basename(__file__))
@@ -103,7 +104,42 @@ def variables(ctx, service, environment, extra_var):
     output(json.dumps(all_vars, indent=2, sort_keys=True))
 
 
-@cli.command('templates')
+@cli.command('template')
+@click.option('-s', '--service', help='Service name.', required=True)
+@click.option('-e', '--environment', help='Environment name.', required=True)
+@click.option('-x', '--extra-var', multiple=True,
+              help='Extra variables, as "key=value" pairs. You can define this multiple times.')
+@click.option('-i', '--ignore-missing', is_flag=True,
+              help='Do not fail on undefined variables in templates.')
+@click.option('-w', '--write-to-dir', default=None,
+              help='Write out templates to given directory.')
+@click.pass_context
+def template(ctx, service, environment, extra_var, ignore_missing, write_to_dir):
+    """Resolve and show all templates for given service in given environment."""
+    cfg = get_config(ctx)
+    require_all_replaced = not ignore_missing
+
+    if write_to_dir:
+        output("Write out templates to directory: {}".format(write_to_dir))
+        target_dir = cfg.prepare_templated_work_dir(service, environment,
+                                                    parse_extra_vars(extra_var),
+                                                    require_all_replaced, write_to_dir)
+        if target_dir:
+            output("Successfully wrote template files: {}".format(os.listdir(target_dir)))
+        else:
+            output("Writing out template files failed", color="red")
+    else:
+        for file_path in cfg.list_template_files(service, environment, parse_extra_vars(extra_var)):
+            data = cfg.populate_template(file_path, require_all_replaced)
+
+            output('### ' + file_path, color='blue')
+            output('### ' + cfg.parse_filename_var(os.path.basename(file_path)) + ' ###',
+                   color='blue')
+            output(data)
+            output('### END ###', color='blue')
+
+
+@cli.command('execute')
 @click.option('-s', '--service', help='Service name.', required=True)
 @click.option('-e', '--environment', help='Environment name.', required=True)
 @click.option('-x', '--extra-var', multiple=True,
@@ -111,17 +147,15 @@ def variables(ctx, service, environment, extra_var):
 @click.option('-i', '--ignore-missing', is_flag=True,
               help='Do not fail on undefined variables in templates.')
 @click.pass_context
-def templates(ctx, service, environment, extra_var, ignore_missing):
-    """Resolve and show all templates for given service in given environment."""
+def execute(ctx, service, environment, extra_var, ignore_missing):
+    """Execute command on temporary directory with resolved templates
+    for given service in given environment."""
     cfg = get_config(ctx)
     require_all_replaced = not ignore_missing
-    for file_path in cfg.list_template_files(service, environment, parse_extra_vars(extra_var)):
-        data = cfg.populate_template(file_path, require_all_replaced)
-
-        output('### ' + file_path, color='blue')
-        output('### ' + cfg.parse_filename_var(os.path.basename(file_path)) + ' ###', color='blue')
-        output(data)
-        output('### END ###', color='blue')
+    target_dir = cfg.prepare_templated_work_dir(service, environment,
+                                                parse_extra_vars(extra_var), require_all_replaced)
+    exec_cmd = cfg.get_execution_command()
+    call_shell(target_dir, exec_cmd)
 
 
 def main():
