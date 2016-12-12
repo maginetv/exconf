@@ -37,11 +37,12 @@ NOTICE: You can change the name of these directories in the *exconf.yaml*, if yo
 NOTICE: Variables "service" and "environment" are set into the variables automatically,
         when you populate the templates or list variables, based on the CLI input.
 
-The actions the CLI supports for the configurations:
+CLI supports following commands:
 * **"execute"** a script, which is usually for deployment purposes for a service. The execution must
   always target some service and some environment defined in the configuration folder.
 * **"templates"** command prints out the templates for your service without executing any scripts.
   You usually use this for confirming you configuration is valid before executing a deployment.
+  You can also just write out the templates into chosen directory using the *-w* flag.
 * **"variables"** command can be used to print out all the variables that can be applied to the
   targeted service and environment.
 
@@ -51,7 +52,7 @@ will replace the string templates with configuration variables defined in the *e
 and *services* folders. Variables inside other variables will be replaced in recursive manner
 until all string templates are resolved.
 
-When you call *execute* or *templates* command, the CLI will generate a temporary folder
+When you call *execute* or *template* command, the CLI will generate a temporary folder
 locally and copy all the templates defined in the *templates* folder for your specific
 *template_type* that is defined for the service and environment. These templates will be resolved
 and all found string variables replaced by the recursively resolved variables as described above.
@@ -104,7 +105,7 @@ services in any environment using the type of template.
 If the same configuration file name is defined in lower levels, the higher level template will be
 overwritten by the more specific configuration.
 
-Try out the configuration resolution using the CLI **templates** command.
+Try out the configuration resolution using the CLI **template** command.
 
 
 ### File name string templates
@@ -112,10 +113,10 @@ Try out the configuration resolution using the CLI **templates** command.
 Some systems require the configuration file names to be specific, like the name of the service
 being deployed. For this purpose you can use file name string templates, which have separately
 defined string template prefix and suffix in the *exconf.yaml*. The default is three underscores,
-i.e. "___"
+i.e. "___", for prefix and suffix.
 
-Let's say that you would need to have a configuration file named after the deployed service
-name with .yml file type extension, you could add a file named *\_\_\_service\_\_\_.yml* into the
-templates directory of the *template_type* your service is using. Then if you have a variable
-named "service" with defined value *my_service* when populating the templates, the file would
-be named my_service.yml in the temporary work directory created for execution.
+As an example let's say that you would need to have a configuration file named after the deployed
+service name with .yml file type extension, you could add a file named *\_\_\_service\_\_\_.yml*
+into the templates directory for the *template_type* your service is using. If your service
+is named *my_service*, when populating the templates, the file would become *my_service.yml*
+in the work directory created for execution.
