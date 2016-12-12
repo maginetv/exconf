@@ -40,7 +40,7 @@ NOTICE: Variables "service" and "environment" are set into the variables automat
 CLI supports following commands:
 * **"execute"** a script, which is usually for deployment purposes for a service. The execution must
   always target some service and some environment defined in the configuration folder.
-* **"templates"** command prints out the templates for your service without executing any scripts.
+* **"template"** command prints out the templates for your service without executing any scripts.
   You usually use this for confirming you configuration is valid before executing a deployment.
   You can also just write out the templates into chosen directory using the *-w* flag.
 * **"variables"** command can be used to print out all the variables that can be applied to the
