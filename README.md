@@ -21,11 +21,17 @@ Exconf follows these basic principles:
 
 ## Install Exconf
 
-Clone the source repository and build a Debian package or Python egg/wheel by calling:
+Clone the source repository and build a Debian package or Python egg/wheel by calling any of:
 
 ```
 make egg
+```
+
+```
 make wheel
+```
+
+```
 make deb
 ```
 
@@ -69,13 +75,9 @@ Now you should be able to do just:
 exconf list-services
 ```
 
-There is only one simplistic hello-world service available in example directory:
-
-```
-exconf list-services
-```
-
-Now you can try out all the features available in exconf by calling the following commands:
+There is only one simplistic *hello-world* service available in example directory. Try out to get
+configurations for *hello-world*, and also executing the defined template type executable, which is
+just plan echo command in this case, printing out a configured text message into stdout.
 
 ```
 exconf variables -s hello-world -e local
