@@ -77,7 +77,7 @@ exconf list-services
 
 There is only one simplistic *hello-world* service available in example directory. Try out to get
 configurations for *hello-world*, and also executing the defined template type executable, which is
-just plan echo command in this case, printing out a configured text message into stdout.
+just plain *echo* command in this case, printing out a configured text message into stdout.
 
 ```
 exconf variables -s hello-world -e local
