@@ -224,11 +224,12 @@ class ExconfConfig(object):
                                   all_vars[EXCONF_VAR_FILE_TEMPLATE_PREFIX],
                                   all_vars[EXCONF_VAR_FILE_TEMPLATE_SUFFIX])
 
-    def populate_and_write_template_file(self, template_file_path, target_dir, file_mode=0o640):
+    def populate_and_write_template_file(self, template_file_path, target_dir, file_mode=0o640,
+                                         require_all_replaced=True):
         if not os.path.isdir(target_dir):
             raise ValueError("Target diretory does not exist: {}".format(target_dir))
         try:
-            data = self.populate_template(template_file_path, True)
+            data = self.populate_template(template_file_path, require_all_replaced)
         except KeyError as err:
             LOG.error("Variable '{}' not defined for template file '{}'"
                       .format(err.args[0], template_file_path))
@@ -259,9 +260,11 @@ class ExconfConfig(object):
             file_mode = 0o640
             if os.path.basename(file_path) == exec_file_name:
                 file_mode = 0o770
-            success = self.populate_and_write_template_file(file_path, target_dir, file_mode)
+            success = self.populate_and_write_template_file(file_path, target_dir, file_mode,
+                                                            require_all_replaced)
             if not success:
-                LOG.error("Failed writing template file: {}", file_path)
+                LOG.error("Failed writing template file '{}' into target directory: {}",
+                          file_path, target_dir)
                 return None
 
         return os.path.abspath(target_dir)

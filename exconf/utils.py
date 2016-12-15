@@ -161,13 +161,14 @@ def substitute_vars(data, vars, require_all_replaced, comment_begin,
                     if j > i:
                         var_name = line[i:j].strip()
                         i = j + len(template_suffix)
-                        var_value = vars.get(var_name)
-                        if var_value is not None:
+                        if var_name not in vars:
+                            if require_all_replaced:
+                                missing_vars_with_lines.append((line_num, var_name))
+                        else:
+                            var_value = vars.get(var_name)
                             replaced_variables.append(var_name)
                             line = line[0:tag_begin] + str(var_value) + line[i:]
                             has_changed = True
-                        elif require_all_replaced:
-                            missing_vars_with_lines.append((line_num, var_name))
         output.append(line)
 
     if replaced_variables:

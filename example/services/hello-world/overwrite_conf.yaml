@@ -1,2 +1,3 @@
 ---
-message: 'Hello world, in environment "${{ environment }}", with host "${{ host_name }}"!'
+message: |
+  Hello world! In environment \"${{ environment }}\", with host \"${{ host_name }}\"!

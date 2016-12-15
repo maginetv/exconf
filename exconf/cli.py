@@ -109,7 +109,7 @@ def variables(ctx, service, environment, extra_var):
 @click.option('-e', '--environment', help='Environment name.', required=True)
 @click.option('-x', '--extra-var', multiple=True,
               help='Extra variables, as "key=value" pairs. You can define this multiple times.')
-@click.option('-i', '--ignore-missing', is_flag=True,
+@click.option('-i', '--ignore-missing', is_flag=True, default=False,
               help='Do not fail on undefined variables in templates.')
 @click.option('-w', '--write-to-dir', default=None,
               help='Write out templates to given directory.')
@@ -129,7 +129,9 @@ def template(ctx, service, environment, extra_var, ignore_missing, write_to_dir)
         else:
             output("Writing out template files failed", color="red")
     else:
-        for file_path in cfg.list_template_files(service, environment, parse_extra_vars(extra_var)):
+        for file_path in cfg.list_template_files(service, environment,
+                                                 parse_extra_vars(extra_var),
+                                                 require_all_replaced):
             data = cfg.populate_template(file_path, require_all_replaced)
 
             output('### ' + file_path, color='blue')
@@ -144,7 +146,7 @@ def template(ctx, service, environment, extra_var, ignore_missing, write_to_dir)
 @click.option('-e', '--environment', help='Environment name.', required=True)
 @click.option('-x', '--extra-var', multiple=True,
               help='Extra variables, as "key=value" pairs. You can define this multiple times.')
-@click.option('-i', '--ignore-missing', is_flag=True,
+@click.option('-i', '--ignore-missing', is_flag=True, default=False,
               help='Do not fail on undefined variables in templates.')
 @click.pass_context
 def execute(ctx, service, environment, extra_var, ignore_missing):
