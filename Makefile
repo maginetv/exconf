@@ -1,16 +1,27 @@
 default: egg
 
-.PHONY: default egg clean test install-deps
+.PHONY: default deb egg clean test install-deps
+
+deb:
+	sudo mk-build-deps -i -r
+	dpkg-buildpackage -us -uc -b
 
 egg:
 	python setup.py sdist
 
+wheel:
+	python setup.py sdist bdist_wheel
+
 clean:
-	@rm -rf build dist exconf.egg-info
+	@rm -rf build dist *.egg-info
 	@find . -type f -name '*.pyc' -delete
 
-install-deps:
-	pip3 install -r requirements.txt
+clean-deb:
+	dpkg-buildpackage -rfakeroot -Tclean
+
+install:
+	pip install -r requirements.txt
+	python setup.py install
 
 test:
 	PYTHONPATH=exconf nosetests

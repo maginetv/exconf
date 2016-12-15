@@ -1,0 +1,16 @@
+Source: exconf
+Section: python
+Priority: optional
+Maintainer: Hannu Varjoranta <h.varjoranta@gmail.com>
+Build-Depends:
+  python (>= 2.7),
+  dh-virtualenv (>= 1.0),
+  python-support
+Standards-Version: 3.9.5
+X-Python-Version: >= 2.7
+Homepage: https://github.com/maginetv/exconf
+
+Package: exconf
+Architecture: all
+Depends: ${misc:Depends}, python (>= 2.7), ${python:Depends}
+Description: Tool for environment and service specific multi-dimensional configuration

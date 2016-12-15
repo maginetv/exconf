@@ -15,7 +15,7 @@ from setuptools import find_packages
 from setuptools import setup
 
 setup(name='exconf',
-      version='0.0.1',
+      version='0.1.0',
       author=u'Hannu Varjoranta',
       author_email='hannu.varjoranta@magine.com',
       url='https://github.com/maginetv/exconf',
