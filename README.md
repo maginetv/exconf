@@ -18,6 +18,13 @@ Exconf follows these basic principles:
   like trigger an *Ansible* playbook or whatever other configuration management tool for
   more complex needs.
 
+At *Magine* we use *Exconf* for defining configurations for all of our different environments in one
+place independently of what service scheduler or environment specifics are. We can use *Exconf* to
+create an *Aurora* (*Mesos*) scheduler config and deploy the service, or maybe define a *Kubernetes*
+pod config for deploying the same service using different tooling in different environment. Many
+details remain the same independently of the deployment method, and Exconf provides a way to define
+these things in single location.
+
 
 ## Install Exconf
 
