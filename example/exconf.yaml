@@ -8,7 +8,7 @@ environments_dir_name: 'environments'
 
 # The string templates in your configuration templates will be replaced recursively
 # by the variables resolved for the service and environment combo you are running.
-string_template_prefix: '{{'
+string_template_prefix: '${{'
 string_template_suffix: '}}'
 
 # The string templates in file names will be substituted when the templates are
@@ -24,4 +24,4 @@ template_comment_line_begin: '#'
 # temporary folder. If you point to a file name, make sure you have such template
 # file available. File defined in execution_file variable will get execution rights.
 execution_file: 'deploy.sh'
-execution_command: './{{ execution_file }}'
+execution_command: './${{ execution_file }}'

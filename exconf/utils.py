@@ -111,7 +111,7 @@ def list_files_not_seen(source_dir, seen_file_names):
 
 
 def recursive_replace_vars(all_vars, require_all_replaced=True, comment_begin='#',
-                           template_prefix='{{', template_suffix='}}'):
+                           template_prefix='${{', template_suffix='}}'):
     result = copy.deepcopy(all_vars)
     for key in all_vars.keys():
         try:
