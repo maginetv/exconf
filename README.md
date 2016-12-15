@@ -19,6 +19,79 @@ Exconf follows these basic principles:
   more complex needs.
 
 
+## Install Exconf
+
+Clone the source repository and build a Debian package or Python egg/wheel by calling:
+
+```
+make egg
+make wheel
+make deb
+```
+
+You can also just install the Python package locally by:
+
+```
+make install
+```
+
+Exconf source is compatible with Python 2.7 and Python 3.5 or later.
+
+
+## Hello-World Example
+
+After you have installed exconf CLI, and you just want to try out the basic functionality, you can
+point the tool into the "example" configuration space within the exconf source code. Assuming here
+that the source code lives in directory */code/exconf*. Try out the following calls:
+
+```
+exconf --help
+```
+
+```
+exconf -c /code/exconf/example list-services
+```
+
+```
+exconf -c /code/exconf/example list-envs
+```
+
+You can also define an environment variable `EXCONF_CONFIG_ROOT` so you don't need to give the `-c`
+flag every time.
+
+```
+export EXCONF_CONFIG_ROOT=/code/exconf/example
+```
+
+Now you should be able to do just:
+
+```
+exconf list-services
+```
+
+There is only one simplistic hello-world service available in example directory:
+
+```
+exconf list-services
+```
+
+Now you can try out all the features available in exconf by calling the following commands:
+
+```
+exconf variables -s hello-world -e local
+```
+
+```
+exconf template -s hello-world -e local
+```
+
+```
+exconf execute -s hello-world -e local
+```
+
+Continue reading to learn what all of the calls actually mean.
+
+
 ## Exconf Overview
 
 Things you will need to setup:
