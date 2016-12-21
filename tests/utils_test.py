@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from exconf import utils
 
@@ -31,7 +34,3 @@ class UtilsTest(unittest.TestCase):
         self.assertEquals(utils.verbosity_level_to_log_level(1), "info")
         for x in range(2, 10):
             self.assertEquals(utils.verbosity_level_to_log_level(x), "debug")
-
-
-if __name__ == "__main__":
-    unittest.main()

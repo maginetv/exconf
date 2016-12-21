@@ -3,6 +3,6 @@ python:
   - "2.7"
 install: 
   - pip install coveralls
-script: cd tests && coverage run *_test.py && cd ..
+script: make coverage
 after_success:
-  cd tests && coveralls
+  coveralls

@@ -25,3 +25,6 @@ install:
 
 test:
 	PYTHONPATH=exconf nosetests
+
+coverage:
+	coverage run tests/*_test.py
