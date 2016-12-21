@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.org/maginetv/exconf.svg?branch=master)](https://travis-ci.org/maginetv/exconf)
+[![Coverage Status](https://coveralls.io/repos/github/maginetv/exconf/badge.svg?branch=master)](https://coveralls.io/github/maginetv/exconf?branch=master)
+[![Code Climate](https://codeclimate.com/github/maginetv/exconf/badges/gpa.svg)](https://codeclimate.com/github/maginetv/exconf)
+
 # exconf
 
 Tool for environment and service specific multi-dimensional configuration.
@@ -18,88 +22,6 @@ Exconf follows these basic principles:
   like trigger an *Ansible* playbook or whatever other configuration management tool for
   more complex needs.
 
-At *Magine* we use *Exconf* for defining configurations for all of our different environments in one
-place independently of what service scheduler or environment specifics are. We can use *Exconf* to
-create an *Aurora* (*Mesos*) scheduler config and deploy the service, or maybe define a *Kubernetes*
-pod config for deploying the same service using different tooling in different environment. Many
-details remain the same independently of the deployment method, and Exconf provides a way to define
-these things in single location.
-
-
-## Install Exconf
-
-Clone the source repository and build a Debian package or Python egg/wheel by calling any of:
-
-```
-make egg
-```
-
-```
-make wheel
-```
-
-```
-make deb
-```
-
-You can also just install the Python package locally by:
-
-```
-make install
-```
-
-Exconf source is compatible with Python 2.7 and Python 3.5 or later.
-
-
-## Hello-World Example
-
-After you have installed exconf CLI, and you just want to try out the basic functionality, you can
-point the tool into the "example" configuration space within the exconf source code. Assuming here
-that the source code lives in directory */code/exconf*. Try out the following calls:
-
-```
-exconf --help
-```
-
-```
-exconf -c /code/exconf/example list-services
-```
-
-```
-exconf -c /code/exconf/example list-envs
-```
-
-You can also define an environment variable `EXCONF_CONFIG_ROOT` so you don't need to give the `-c`
-flag every time.
-
-```
-export EXCONF_CONFIG_ROOT=/code/exconf/example
-```
-
-Now you should be able to do just:
-
-```
-exconf list-services
-```
-
-There is only one simplistic *hello-world* service available in example directory. Try out to get
-configurations for *hello-world*, and also executing the defined template type executable, which is
-just plain *echo* command in this case, printing out a configured text message into stdout.
-
-```
-exconf variables -s hello-world -e local
-```
-
-```
-exconf template -s hello-world -e local
-```
-
-```
-exconf execute -s hello-world -e local
-```
-
-Continue reading to learn what all of the calls actually mean.
-
 
 ## Exconf Overview
 
@@ -119,12 +41,11 @@ NOTICE: You can change the name of these directories in the *exconf.yaml*, if yo
 NOTICE: Variables "service" and "environment" are set into the variables automatically,
         when you populate the templates or list variables, based on the CLI input.
 
-CLI supports following commands:
+The actions the CLI supports for the configurations:
 * **"execute"** a script, which is usually for deployment purposes for a service. The execution must
   always target some service and some environment defined in the configuration folder.
-* **"template"** command prints out the templates for your service without executing any scripts.
+* **"templates"** command prints out the templates for your service without executing any scripts.
   You usually use this for confirming you configuration is valid before executing a deployment.
-  You can also just write out the templates into chosen directory using the *-w* flag.
 * **"variables"** command can be used to print out all the variables that can be applied to the
   targeted service and environment.
 
@@ -134,7 +55,7 @@ will replace the string templates with configuration variables defined in the *e
 and *services* folders. Variables inside other variables will be replaced in recursive manner
 until all string templates are resolved.
 
-When you call *execute* or *template* command, the CLI will generate a temporary folder
+When you call *execute* or *templates* command, the CLI will generate a temporary folder
 locally and copy all the templates defined in the *templates* folder for your specific
 *template_type* that is defined for the service and environment. These templates will be resolved
 and all found string variables replaced by the recursively resolved variables as described above.
@@ -187,7 +108,7 @@ services in any environment using the type of template.
 If the same configuration file name is defined in lower levels, the higher level template will be
 overwritten by the more specific configuration.
 
-Try out the configuration resolution using the CLI **template** command.
+Try out the configuration resolution using the CLI **templates** command.
 
 
 ### File name string templates
@@ -195,10 +116,10 @@ Try out the configuration resolution using the CLI **template** command.
 Some systems require the configuration file names to be specific, like the name of the service
 being deployed. For this purpose you can use file name string templates, which have separately
 defined string template prefix and suffix in the *exconf.yaml*. The default is three underscores,
-i.e. "___", for prefix and suffix.
+i.e. "___"
 
-As an example let's say that you would need to have a configuration file named after the deployed
-service name with .yml file type extension, you could add a file named *\_\_\_service\_\_\_.yml*
-into the templates directory for the *template_type* your service is using. If your service
-is named *my_service*, when populating the templates, the file would become *my_service.yml*
-in the work directory created for execution.
+Let's say that you would need to have a configuration file named after the deployed service
+name with .yml file type extension, you could add a file named *\_\_\_service\_\_\_.yml* into the
+templates directory of the *template_type* your service is using. Then if you have a variable
+named "service" with defined value *my_service* when populating the templates, the file would
+be named my_service.yml in the temporary work directory created for execution.
