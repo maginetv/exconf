@@ -14,9 +14,13 @@
 import unittest
 import sys
 import os
+import logbook
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 from exconf import utils
+try:
+        from StringIO import StringIO
+except ImportError:
+        from io import StringIO
 
 
 class UtilsTest(unittest.TestCase):
@@ -34,3 +38,19 @@ class UtilsTest(unittest.TestCase):
         self.assertEquals(utils.verbosity_level_to_log_level(1), "info")
         for x in range(2, 10):
             self.assertEquals(utils.verbosity_level_to_log_level(x), "debug")
+
+    def test_get_logger(self):
+        self.assertTrue(type(utils.get_logger()) is logbook.base.Logger)
+
+    def test_read_yaml(self):
+        self.assertEquals(utils.read_yaml("./tests/resources/file.yaml"), {'foo': {'bar': ['meh', 'zhe']}})
+
+    def test_read_yaml_file_not_present(self):
+        out = StringIO()
+        self.assertEquals(utils.read_yaml("./tests/resources/null.yaml", out=out), None)
+        self.assertEquals(out.getvalue().strip(), "Oops! That was no file in ./tests/resources/null.yaml.")
+
+    def test_read_yaml_file_not_valid(self):
+        out = StringIO()
+        self.assertEquals(utils.read_yaml("./tests/resources/invalid.yaml", out=out), None)
+        self.assertEquals(out.getvalue().strip(), "Oops! File ./tests/resources/invalid.yaml is not a valid yaml.")
