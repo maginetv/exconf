@@ -54,6 +54,13 @@ make install
 
 Exconf source is compatible with Python 2.7 and Python 3.5 or later.
 
+## Developing
+
+When applying changes check if all testes are passing
+
+```
+make test
+```
 
 ## Hello-World Example
 
