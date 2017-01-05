@@ -55,8 +55,13 @@ def get_logger(logger_name="magine-services"):
 LOG = get_logger()
 
 
-def read_yaml(file_path):
-    return yaml.load(open(file_path).read())
+def read_yaml(file_path, out=sys.stdout):
+    try:
+        return yaml.load(open(file_path).read())
+    except FileNotFoundError:
+        raise FileNotFoundError("Oops! That was no file in {file_path}.".format(**locals()))
+    except yaml.scanner.ScannerError:
+        raise yaml.scanner.ScannerError("Oops! File {file_path} is not a valid yaml.".format(**locals()))
 
 
 def call_shell(work_dir, shell_cmd, print_output=True):

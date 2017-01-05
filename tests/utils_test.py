@@ -12,8 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-
+import sys
+import os
+import yaml
+import logbook
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from exconf import utils
+try:
+        from StringIO import StringIO
+except ImportError:
+        from io import StringIO
 
 
 class UtilsTest(unittest.TestCase):
@@ -32,6 +40,20 @@ class UtilsTest(unittest.TestCase):
         for x in range(2, 10):
             self.assertEquals(utils.verbosity_level_to_log_level(x), "debug")
 
+    def test_get_logger(self):
+        self.assertTrue(type(utils.get_logger()) is logbook.base.Logger)
 
-if __name__ == "__main__":
-    unittest.main()
+    def test_read_yaml(self):
+        self.assertEquals(utils.read_yaml("./tests/resources/file.yaml"), {'foo': {'bar': ['meh', 'zhe']}})
+
+    def test_read_yaml_file_not_present(self):
+        out = StringIO()
+        with self.assertRaises(FileNotFoundError) as context:
+            utils.read_yaml("./tests/resources/null.yaml")
+            self.assertTrue(out.getvalue().strip(), "Oops! That was no file in ./tests/resources/null.yaml." in context)
+
+    def test_read_yaml_file_not_valid(self):
+        out = StringIO()
+        with self.assertRaises(yaml.scanner.ScannerError) as context:
+            utils.read_yaml("./tests/resources/invalid.yaml")
+            self.assertTrue("Oops! File ./tests/resources/invalid.yaml is not a valid yaml." in context)

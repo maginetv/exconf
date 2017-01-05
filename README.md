@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.org/maginetv/exconf.svg?branch=master)](https://travis-ci.org/maginetv/exconf)
+[![Coverage Status](https://coveralls.io/repos/github/maginetv/exconf/badge.svg?branch=master)](https://coveralls.io/github/maginetv/exconf?branch=master)
+[![Code Climate](https://codeclimate.com/github/maginetv/exconf/badges/gpa.svg)](https://codeclimate.com/github/maginetv/exconf)
+
 # exconf
 
 Tool for environment and service specific multi-dimensional configuration.
@@ -50,6 +54,13 @@ make install
 
 Exconf source is compatible with Python 2.7 and Python 3.5 or later.
 
+## Developing
+
+When applying changes check if all testes are passing
+
+```
+make test
+```
 
 ## Hello-World Example
 
