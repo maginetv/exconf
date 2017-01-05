@@ -14,6 +14,7 @@
 import unittest
 import sys
 import os
+import yaml
 import logbook
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from exconf import utils
@@ -47,10 +48,12 @@ class UtilsTest(unittest.TestCase):
 
     def test_read_yaml_file_not_present(self):
         out = StringIO()
-        self.assertEquals(utils.read_yaml("./tests/resources/null.yaml", out=out), None)
-        self.assertEquals(out.getvalue().strip(), "Oops! That was no file in ./tests/resources/null.yaml.")
+        with self.assertRaises(FileNotFoundError) as context:
+            utils.read_yaml("./tests/resources/null.yaml")
+            self.assertTrue(out.getvalue().strip(), "Oops! That was no file in ./tests/resources/null.yaml." in context)
 
     def test_read_yaml_file_not_valid(self):
         out = StringIO()
-        self.assertEquals(utils.read_yaml("./tests/resources/invalid.yaml", out=out), None)
-        self.assertEquals(out.getvalue().strip(), "Oops! File ./tests/resources/invalid.yaml is not a valid yaml.")
+        with self.assertRaises(yaml.scanner.ScannerError) as context:
+            utils.read_yaml("./tests/resources/invalid.yaml")
+            self.assertTrue("Oops! File ./tests/resources/invalid.yaml is not a valid yaml." in context)
