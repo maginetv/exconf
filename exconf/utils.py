@@ -115,6 +115,10 @@ def list_files_not_seen(source_dir, seen_file_names):
     return file_paths
 
 
+class RecursionError(StandardError):
+    pass
+
+
 def recursive_replace_vars(all_vars, require_all_replaced=True, comment_begin='#',
                            template_prefix='${{', template_suffix='}}'):
     result = copy.deepcopy(all_vars)
@@ -143,7 +147,7 @@ def substitute_vars_until_done(data, all_vars, require_all_replaced, comment_beg
     return data
 
 
-def substitute_vars(data, vars, require_all_replaced, comment_begin,
+def substitute_vars(data, all_vars, require_all_replaced, comment_begin,
                     template_prefix, template_suffix):
     """Just simple string template substitution, like Python string templates etc.
 
@@ -166,11 +170,11 @@ def substitute_vars(data, vars, require_all_replaced, comment_begin,
                     if j > i:
                         var_name = line[i:j].strip()
                         i = j + len(template_suffix)
-                        if var_name not in vars:
+                        if var_name not in all_vars:
                             if require_all_replaced:
                                 missing_vars_with_lines.append((line_num, var_name))
                         else:
-                            var_value = vars.get(var_name)
+                            var_value = all_vars.get(var_name)
                             replaced_variables.append(var_name)
                             line = line[0:tag_begin] + str(var_value) + line[i:]
                             has_changed = True

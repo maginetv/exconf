@@ -173,11 +173,9 @@ class ExconfConfig(object):
             all_vars[EXCONF_VAR_STR_TEMPLATE_SUFFIX])
         return self.resolved_vars
 
-    def list_template_files(self, service, environment, extra_variables=None,
-                            require_all_replaced=True, all_vars=None):
+    def list_template_files(self, service, environment, extra_variables=None, all_vars=None):
         if not all_vars:
-            all_vars = self.resolve_variables(service, environment, extra_variables,
-                                              require_all_replaced)
+            all_vars = self.resolve_variables(service, environment, extra_variables, False)
         if EXCONF_VAR_TEMPLATE_TYPE not in all_vars:
             raise ValueError("Template type (var {}) not defined.".format(EXCONF_VAR_TEMPLATE_TYPE))
 
@@ -255,8 +253,7 @@ class ExconfConfig(object):
                                           require_all_replaced)
         exec_file_name = self.get_execution_file()
 
-        for file_path in self.list_template_files(service, environment, extra_variables,
-                                                  require_all_replaced, all_vars):
+        for file_path in self.list_template_files(service, environment, extra_variables, all_vars):
             file_mode = 0o640
             if os.path.basename(file_path) == exec_file_name:
                 file_mode = 0o770

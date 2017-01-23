@@ -129,9 +129,7 @@ def template(ctx, service, environment, extra_var, ignore_missing, write_to_dir)
         else:
             output("Writing out template files failed", color="red")
     else:
-        for file_path in cfg.list_template_files(service, environment,
-                                                 parse_extra_vars(extra_var),
-                                                 require_all_replaced):
+        for file_path in cfg.list_template_files(service, environment, parse_extra_vars(extra_var)):
             data = cfg.populate_template(file_path, require_all_replaced)
 
             output('### ' + file_path, color='blue')
